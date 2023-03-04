@@ -10,7 +10,8 @@
 			"packages": [
 				"vim"
 			]
-		}
+		},
+		"ghcr.io/devcontainers/features/node:1": {}
 	},
 	"mounts": [
 		"source=${localEnv:HOME}/.aws/,target=/home/vscode/.aws,type=bind,consistency=cached"
@@ -19,13 +20,18 @@
 		"vscode": {
 			"extensions": [
 				"vscodevim.vim",
-				"golang.go"
+				"golang.go",
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode"
 			],
 			"settings": {
 				"go.formatTool": "goimports",
 				"go.useLanguageServer": true,
 				"[go]": {
 					"editor.defaultFormatter": "golang.go"
+				},
+				"[typescript]": {
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
 				}
 			}
 		}
