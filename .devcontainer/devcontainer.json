@@ -1,0 +1,33 @@
+{
+	"name": "Ubuntu",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/base:jammy",
+	"features": {
+		"ghcr.io/devcontainers/features/go:1": {},
+		"ghcr.io/devcontainers/features/aws-cli:1": {},
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"upgradePackages": true,
+			"packages": [
+				"vim"
+			]
+		}
+	},
+	"mounts": [
+		"source=${localEnv:HOME}/.aws/,target=/home/vscode/.aws,type=bind,consistency=cached"
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"vscodevim.vim",
+				"golang.go"
+			],
+			"settings": {
+				"go.formatTool": "goimports",
+				"go.useLanguageServer": true,
+				"[go]": {
+					"editor.defaultFormatter": "golang.go"
+				}
+			}
+		}
+	}
+}
