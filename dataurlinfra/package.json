@@ -1,8 +1,8 @@
 {
-  "name": "infra",
+  "name": "dataurlinfra",
   "version": "0.1.0",
   "bin": {
-    "infra": "bin/infra.js"
+    "dataurlinfra": "bin/dataurlinfra.js"
   },
   "scripts": {
     "build": "tsc",
