@@ -39,6 +39,7 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 
 	d, err := dataurl.DecodeString(data)
 	if err != nil {
+		log.Printf("dataurl: %s", data)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       http.StatusText(http.StatusBadRequest),
