@@ -18,14 +18,22 @@ func main() {
 
 func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var data string
-	switch request.HTTPMethod {
-	case "POST":
-		data = request.Body
-	default:
+	if request.HTTPMethod != "POST" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusMethodNotAllowed,
 			Body:       http.StatusText(http.StatusMethodNotAllowed),
 		}, nil
+	}
+
+	if request.IsBase64Encoded {
+		bs, err := base64.StdEncoding.DecodeString(data)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusBadRequest,
+				Body:       "invalid dataurl",
+			}, nil
+		}
+		data = string(bs)
 	}
 
 	d, err := dataurl.DecodeString(data)
