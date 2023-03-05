@@ -21,15 +21,6 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 	switch request.HTTPMethod {
 	case "POST":
 		data = request.Body
-	case "GET":
-		var ok bool
-		data, ok = request.QueryStringParameters["d"]
-		if !ok {
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusBadRequest,
-				Body:       "query parameter 'd' with dataurl value required",
-			}, nil
-		}
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusMethodNotAllowed,
