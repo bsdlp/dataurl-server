@@ -1,0 +1,91 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+env:
+  AWS_REGION: us-west-2
+permissions:
+  id-token: write
+  contents: read
+name: deploy
+jobs:
+  build_lambdas:
+    strategy:
+      matrix:
+        go-version:
+          - 1.20.1
+        cdk-version:
+          - 2.67.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: install go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: checkout code
+        uses: actions/checkout@v3
+      - name: go build
+        env:
+          CGO_ENABLED: "0"
+          GOOS: linux
+        run: |
+          mkdir build
+          go build -a -ldflags='-extldflags=-static' -o ./build/ ./cmd/...
+      - name: archive built binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries
+          path: ${{ github.workspace }}
+  cdk_diff:
+    if: github.ref != 'refs/heads/main'
+    needs: [build_lambdas]
+    runs-on: ubuntu-latest
+    steps:
+      - name: download binaries
+        id: download
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries
+          path: ${{ github.workspace }}
+      - name: fix executable permissions
+        run: chmod 755 -R ${{ github.workspace }}/build
+      - name: install dependencies
+        working-directory: _infra
+        run: npm install
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::635281304921:role/github-cdk-deploy
+          aws-region: us-west-2
+      - name: cdk diff
+        working-directory: _infra
+        run: npx cdk diff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  cdk_deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: [build_lambdas]
+    runs-on: ubuntu-latest
+    steps:
+      - name: download binaries
+        id: download
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries
+          path: ${{ github.workspace }}
+      - name: fix executable permissions
+        run: chmod 755 -R ${{ github.workspace }}/build
+      - name: install dependencies
+        working-directory: _infra
+        run: npm install
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::635281304921:role/github-cdk-deploy
+          aws-region: us-west-2
+      - name: cdk deploy
+        working-directory: _infra
+        run: npx cdk deploy --require-approval never
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
